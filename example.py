@@ -1,5 +1,4 @@
-#!python3
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 Example code using:
@@ -38,6 +37,7 @@ SUPPLY = WINDOWS_COM if PLATFORM == "windows" else "/dev/ttyACM0"
 
 ########################################################################
 
+
 class PowerSupply(object):
     """
     Abstraction class to EA-PS 2042-20B
@@ -51,9 +51,9 @@ class PowerSupply(object):
             print("success")
 
             ps_info = self.supply.get_device_information()
-            ps_mfg   = ps_info.manufacturer.decode("utf-8")
+            ps_mfg = ps_info.manufacturer.decode("utf-8")
             ps_type = ps_info.device_type.decode("utf-8")
-            ps_sn  = ps_info.device_serial_no.decode("utf-8")
+            ps_sn = ps_info.device_serial_no.decode("utf-8")
             print("  - Connected to {} {} ({})".format(ps_mfg, ps_type, ps_sn))
 
         else:
@@ -64,30 +64,30 @@ class PowerSupply(object):
             self.supply.enable_remote_control()
             command(self)
             self.supply.disable_remote_control()
+
         return send_command
 
-
     def set_voltage(self, voltage):
-        """ Set the voltage level."""
+        """Set the voltage level."""
 
         self.supply.enable_remote_control()
         self.supply.set_voltage(voltage)
         self.supply.disable_remote_control()
 
     def set_current(self, current):
-        """ Set the voltage level."""
+        """Set the voltage level."""
 
         self.supply.enable_remote_control()
         self.supply.set_current(current)
         self.supply.disable_remote_control()
 
     def get_voltage(self):
-        """ Get the present voltage level."""
-        return(self.supply.get_voltage())
+        """Get the present voltage level."""
+        return self.supply.get_voltage()
 
     def get_current(self):
-        """ Get the present current level."""
-        return(self.supply.get_current())
+        """Get the present current level."""
+        return self.supply.get_current()
 
     @_remote_control
     def enable(self):
@@ -96,7 +96,7 @@ class PowerSupply(object):
 
     @_remote_control
     def disable(self):
-        """ Disable the output."""
+        """Disable the output."""
         self.supply.disable_output()
 
 

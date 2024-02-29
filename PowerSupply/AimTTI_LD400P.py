@@ -1,6 +1,4 @@
-#!python3
-#!/usr/bin/python
-#coding: utf-8
+#!/usr/bin/env python3
 
 """
 Code to control an Aim TTi LD400P Programmable Power Supply
@@ -18,7 +16,7 @@ import time
 class LD400P(object):
     def __init__(self, COM):
         self.s = serial.Serial(COM, timeout=1)
-        #self.close_port()
+        # self.close_port()
         self.open_port()
 
     def close_port(self):
@@ -44,7 +42,9 @@ class LD400P(object):
         s = 0
         t = 0.0
         while s < int(delay_in_s):
-            print("{: > 6d} secs{:11s}\r".format(s, "."*int((t/increment)-len(str(s)))), end="")
+            print(
+                "{: > 6d} secs{:11s}\r".format(s, "." * int((t / increment) - len(str(s)))), end=""
+            )
             time.sleep(increment)
             t += increment
             if int(t) == 1:
@@ -54,7 +54,7 @@ class LD400P(object):
 
 
 ###############################################################################
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     D = LD400P("COM3")
     D.write("FREQ 1000")

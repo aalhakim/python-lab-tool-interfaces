@@ -1,6 +1,4 @@
-#!python3
-#!/usr/bin/python
-#coding=utf-8
+#!/usr/bin/env python3
 
 """
 Python access to Elektro Automatik PS 2000 B devices via USB/serial
@@ -30,6 +28,7 @@ Last Updated: 01/01/2020 (aalhakim)
 import serial
 import struct
 import sys
+
 PY_3 = sys.version_info >= (3, 0)
 
 
@@ -62,6 +61,7 @@ def _ord(x):
 # noinspection PyClassHasNoInit
 class Constants:
     """Communication constants"""
+
     # communication parameters taken from [1], chapter 2.2
     CONNECTION_BAUD_RATE = 115200
     CONNECTION_PARITY = serial.PARITY_ODD
@@ -81,6 +81,7 @@ class Objects:
 
     See "Objects List" document from product page.
     """
+
     DEVICE_TYPE = 0
     DEVICE_SERIAL_NO = 1
     NOMINAL_VOLTAGE = 2
@@ -101,6 +102,7 @@ class Objects:
 # noinspection PyClassHasNoInit
 class ControlParameters:
     """Parameters for controlling the device"""
+
     SWITCH_MODE_CMD = 0x10
     SWITCH_MODE_REMOTE = 0x10
     SWITCH_MODE_MANUAL = 0x00
@@ -124,8 +126,8 @@ class Telegram:
         for b in self._bytes:
             cs += b
 
-        cs_high = (cs & 0xff00) >> 8
-        cs_low = cs & 0xff
+        cs_high = (cs & 0xFF00) >> 8
+        cs_low = cs & 0xFF
 
         return [cs_high, cs_low]
 
@@ -136,7 +138,7 @@ class Telegram:
         if expected_data_length > 16:
             raise Exception("only 4 bits for expected length can be used")
 
-        result |= (expected_data_length - 1)
+        result |= expected_data_length - 1
         result |= 0b10000
         result |= 0b100000
         result |= transmission << 6
@@ -153,7 +155,7 @@ class FromPowerSupply(Telegram):
         Telegram.__init__(self)
         data = [_ord(x) for x in raw_data]
         self._bytes = data[0:-2]
-        self._checksum = data[len(data) - 2:len(data)]
+        self._checksum = data[len(data) - 2 : len(data)]
         self.checksum_ok = self._checksum == self._calc_checksum()
 
     def get_sd(self):
@@ -166,7 +168,7 @@ class FromPowerSupply(Telegram):
         return self._bytes[3]
 
     def get_data(self):
-        return self._bytes[3:len(self._bytes)]
+        return self._bytes[3 : len(self._bytes)]
 
     # noinspection PyMethodMayBeStatic
     def get_error(self):
@@ -200,11 +202,16 @@ class DeviceInformation:
         self.software_version = ""
 
     def __str__(self):
-        return "%s %s [%s], SW: %s, Art-Nr: %s, [%0.2f V, %0.2f A, %0.2f W]" % \
-               (self.manufacturer,
-                self.device_type, self.device_serial_no,
-                self.software_version, self.device_article_number,
-                self.nominal_voltage, self.nominal_current, self.nominal_power)
+        return "%s %s [%s], SW: %s, Art-Nr: %s, [%0.2f V, %0.2f A, %0.2f W]" % (
+            self.manufacturer,
+            self.device_type,
+            self.device_serial_no,
+            self.software_version,
+            self.device_article_number,
+            self.nominal_voltage,
+            self.nominal_current,
+            self.nominal_power,
+        )
 
 
 class DeviceStatusInformation:
@@ -217,7 +224,10 @@ class DeviceStatusInformation:
         self.actual_current_percent = float(as_word(raw_data[4:6])) / 256
 
     def __str__(self):
-        return "Remote control active: %s, Output active: %s" % (self.remote_control_active, self.output_active)
+        return "Remote control active: %s, Output active: %s" % (
+            self.remote_control_active,
+            self.output_active,
+        )
 
 
 class PS2000B:
@@ -230,7 +240,7 @@ class PS2000B:
             baudrate=Constants.CONNECTION_BAUD_RATE,
             timeout=Constants.TIMEOUT_BETWEEN_COMMANDS * 2,
             parity=serial.PARITY_ODD,
-            stopbits=Constants.CONNECTION_STOP_BITS
+            stopbits=Constants.CONNECTION_STOP_BITS,
         )
 
         self.__device_information = self.__read_device_information()
@@ -246,13 +256,27 @@ class PS2000B:
 
         # taken from [2]
         result.device_type = as_string(self.__read_device_data(16, Objects.DEVICE_TYPE).get_data())
-        result.device_serial_no = as_string(self.__read_device_data(16, Objects.DEVICE_SERIAL_NO).get_data())
-        result.nominal_voltage = as_float(self.__read_device_data(4, Objects.NOMINAL_VOLTAGE).get_data())
-        result.nominal_current = as_float(self.__read_device_data(4, Objects.NOMINAL_CURRENT).get_data())
-        result.nominal_power = as_float(self.__read_device_data(4, Objects.NOMINAL_POWER).get_data())
-        result.device_article_number = as_string(self.__read_device_data(16, Objects.DEVICE_ARTICLE_NO).get_data())
-        result.manufacturer = as_string(self.__read_device_data(16, Objects.MANUFACTURER).get_data())
-        result.software_version = as_string(self.__read_device_data(16, Objects.SOFTWARE_VERSION).get_data())
+        result.device_serial_no = as_string(
+            self.__read_device_data(16, Objects.DEVICE_SERIAL_NO).get_data()
+        )
+        result.nominal_voltage = as_float(
+            self.__read_device_data(4, Objects.NOMINAL_VOLTAGE).get_data()
+        )
+        result.nominal_current = as_float(
+            self.__read_device_data(4, Objects.NOMINAL_CURRENT).get_data()
+        )
+        result.nominal_power = as_float(
+            self.__read_device_data(4, Objects.NOMINAL_POWER).get_data()
+        )
+        result.device_article_number = as_string(
+            self.__read_device_data(16, Objects.DEVICE_ARTICLE_NO).get_data()
+        )
+        result.manufacturer = as_string(
+            self.__read_device_data(16, Objects.MANUFACTURER).get_data()
+        )
+        result.software_version = as_string(
+            self.__read_device_data(16, Objects.SOFTWARE_VERSION).get_data()
+        )
 
         return result
 
@@ -282,7 +306,9 @@ class PS2000B:
 
     def __send_device_control(self, p1, p2):
         # 0b11 = Send Data (Transmission type)
-        telegram = ToPowerSupply(0b11, [Constants.DEVICE_NODE, Objects.POWER_SUPPLY_CONTROL, p1, p2], 2)
+        telegram = ToPowerSupply(
+            0b11, [Constants.DEVICE_NODE, Objects.POWER_SUPPLY_CONTROL, p1, p2], 2
+        )
         _ = self.__send_and_receive(telegram.get_byte_array())
         self.update_device_information()
 
@@ -297,37 +323,51 @@ class PS2000B:
             raise RuntimeError
 
         p1 = (0xFF00 & value) >> 8
-        p2 =  0x00FF & value
+        p2 = 0x00FF & value
         telegram = ToPowerSupply(0b11, [Constants.DEVICE_NODE, object_id, p1, p2], 2)
         _ = self.__send_and_receive(telegram.get_byte_array())
         self.update_device_information()
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def enable_remote_control(self):
-        self.__send_device_control(ControlParameters.SWITCH_MODE_CMD, ControlParameters.SWITCH_MODE_REMOTE)
+        self.__send_device_control(
+            ControlParameters.SWITCH_MODE_CMD, ControlParameters.SWITCH_MODE_REMOTE
+        )
 
     def disable_remote_control(self):
-        self.__send_device_control(ControlParameters.SWITCH_MODE_CMD, ControlParameters.SWITCH_MODE_MANUAL)
+        self.__send_device_control(
+            ControlParameters.SWITCH_MODE_CMD, ControlParameters.SWITCH_MODE_MANUAL
+        )
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def enable_output(self):
-        self.__send_device_control(ControlParameters.SWITCH_POWER_OUTPUT_CMD, ControlParameters.SWITCH_POWER_OUTPUT_ON)
+        self.__send_device_control(
+            ControlParameters.SWITCH_POWER_OUTPUT_CMD, ControlParameters.SWITCH_POWER_OUTPUT_ON
+        )
 
     def disable_output(self):
-        self.__send_device_control(ControlParameters.SWITCH_POWER_OUTPUT_CMD, ControlParameters.SWITCH_POWER_OUTPUT_OFF)
+        self.__send_device_control(
+            ControlParameters.SWITCH_POWER_OUTPUT_CMD, ControlParameters.SWITCH_POWER_OUTPUT_OFF
+        )
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def get_voltage(self):
         self.update_device_information()
-        voltage = self.__device_information.nominal_voltage * self.__device_status_information.actual_voltage_percent
+        voltage = (
+            self.__device_information.nominal_voltage
+            * self.__device_status_information.actual_voltage_percent
+        )
         return voltage / 100
 
     def get_current(self):
         self.update_device_information()
-        current = self.__device_information.nominal_current * self.__device_status_information.actual_current_percent
+        current = (
+            self.__device_information.nominal_current
+            * self.__device_status_information.actual_current_percent
+        )
         return current / 100
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def set_voltage(self, x):
         new_value_pct = int((100 * 256 * x / self.__device_information.nominal_voltage) + 0.5)
         self.__send_set_value("v", new_value_pct)

@@ -1,6 +1,4 @@
-#!python3
-#!/usr/bin/python
-# coding: utf-8
+#!/usr/bin/env python3
 
 """
 Programmatic control of the Tenma 72-13210 Electronic Load
@@ -20,6 +18,7 @@ import serial
 ########################################################################
 DEVICE_PORT = "COM6"
 
+
 def bEncode(utf8):
     return utf8.encode("utf-8")
 
@@ -28,7 +27,7 @@ def bEncode(utf8):
 class TPL7213210(object):
     def __init__(self, com):
         self.ser = serial.Serial(com, timeout=1)
-        #self.close_port()
+        # self.close_port()
         self.open_port()
 
     def close_port(self):
@@ -50,50 +49,51 @@ class TPL7213210(object):
         print("  {:>8s}: '{}'".format("READ", result))
 
     def idn(self):
-        """ Return device information. """
+        """Return device information."""
         self.read("*IDN?")
 
     def battery_mode(self, ichg, iload, vcutoff, qcutoff, tends):
-        """ Create a battery test mode in location 1
-        """
-        self.write(":BATT 1, {}A, {}A, {}V, {}AH, {}S".format(ichg, iload, vcutoff, qcutoff, tends))
+        """Create a battery test mode in location 1"""
+        self.write(
+            ":BATT 1, {}A, {}A, {}V, {}AH, {}S".format(ichg, iload, vcutoff, qcutoff, tends)
+        )
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def voltage(self):
-        """ Return voltage measurement. """
+        """Return voltage measurement."""
         self.read(":MEAS:VOLT?")
 
     def current(self):
-        """ Return current measurement. """
+        """Return current measurement."""
         self.read(":MEAS:CURR?")
 
     def power(self):
-        """ Return power measurement. """
+        """Return power measurement."""
         self.read(":MEAS:POW?")
 
     # def resistance(self):
     #     """ Return resistance measurement. """
     #     self.read(":MEAS:RES?")
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def set_voltage(self, value):
-        """ Change to constant voltage (CV) and set threshold. """
+        """Change to constant voltage (CV) and set threshold."""
         self.write(":VOLT {}V".format(value))
 
     def set_current(self, value):
-        """ Change to constant current (CC) and set threshold. """
+        """Change to constant current (CC) and set threshold."""
         self.write(":CURR {}A".format(value))
 
     def set_power(self, value):
-        """ Change to constant power (CW) and set threshold. """
+        """Change to constant power (CW) and set threshold."""
         self.write(":POW {}W".format(value))
 
     def set_resistance(self, value):
-        """ Change to constant resistance (CR) and set threshold. """
+        """Change to constant resistance (CR) and set threshold."""
         self.write(":RES {}OHM".format(value))
 
     def set_mode(self, mode):
-        """ Set the mode to CV, CC, CW or CR.
+        """Set the mode to CV, CC, CW or CR.
 
         Parameters
         ----------
@@ -104,67 +104,69 @@ class TPL7213210(object):
             CR: constant resistance
             SHORt: short circuit
 
-         """
+        """
         self.write(":FUNC {}".format(mode))
 
     def get_mode(self):
-        """ Get current system mode. """
+        """Get current system mode."""
         self.read(":FUNC?")
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def get_setVoltage(self):
-        """ Return voltage setting value. """
+        """Return voltage setting value."""
         self.read(":VOLT?")
 
     def get_setCurrent(self):
-        """ Return current setting value measurement. """
+        """Return current setting value measurement."""
         self.read(":CURR?")
 
     def get_setPower(self):
-        """ Return power setting value. """
+        """Return power setting value."""
         self.read(":POW?")
 
     def get_setResistance(self):
-        """ Return resistance setting value. """
+        """Return resistance setting value."""
         self.read(":RES?")
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def enable(self):
-        """ Enable device. """
+        """Enable device."""
         self.write(":INP 1")
 
     def disable(self):
-        """ Enable device. """
+        """Enable device."""
         self.write(":INP 0")
 
     def get_input_status(self):
-        """ Check output status. """
+        """Check output status."""
         self.read(":INP?")
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def beep_on(self):
-        """ Turn the system beep on when buttons are pressed. """
+        """Turn the system beep on when buttons are pressed."""
         self.write(":SYST:BEEP ON")
 
     def beep_off(self):
-        """ Turn the system beep off when buttons are pressed. """
+        """Turn the system beep off when buttons are pressed."""
         self.write(":SYST:BEEP OFF")
 
     def get_beep_status(self):
-        """ Check if the beep is ON or OFF. """
+        """Check if the beep is ON or OFF."""
         self.read(":SYST:BEEP?")
 
     def get_baud_status(self):
-        """ Check what the current baud rate is set to. """
+        """Check what the current baud rate is set to."""
         self.read(":SYST:BAUD?")
 
-    #-------------------------------------------------------------------
+    # -------------------------------------------------------------------
     def sleep(self, delay_in_s):
         increment = 0.1
         s = 0
         t = 0.0
         while s < int(delay_in_s):
-            print("{: > 6d} secs{:11s}\r".format(s, "."*int((t/increment)-len(str(s)))), end="")
+            print(
+                "{: > 6d} secs{:11s}\r".format(s, "." * int((t / increment) - len(str(s)))), end=""
+            )
             time.sleep(increment)
             t += increment
             if int(t) == 1:
@@ -174,7 +176,7 @@ class TPL7213210(object):
 
 
 ########################################################################
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     d = TPL7213210(DEVICE_PORT)
     d.idn()
